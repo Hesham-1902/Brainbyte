@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRAINBYTE ERP</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- JsBarcode -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    
+    <!-- html2canvas & jsPDF -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- SortableJS for drag & drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="#" id="manifestLink">
+    <meta name="theme-color" content="#00ffff">
+    <link rel="icon" type="image/png" href="images/logo.png">
+</head>
+<body class="bg-light">
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-overlay">
+        <div class="spinner-neon"></div>
+    </div>
+
+    <!-- Login View -->
+    <div id="view-login" class="login-container">
+        <div class="container-fluid vh-100 d-flex align-items-center justify-content-center">
+            <div class="row w-100">
+                <div class="col-lg-4 col-md-6 col-sm-8 mx-auto">
+                    <div class="card shadow-lg border-0 rounded-4">
+                        <div class="card-body p-5">
+                            <div class="text-center mb-4">
+                                <img src="images/logo.png" alt="Logo" class="logo-login mb-3" width="80" height="80">
+                                <h2 class="neon-text fw-bold">BRAINBYTE ERP</h2>
+                                <p class="text-muted" data-lang="loginSubtitle">نظام إدارة الأعمال المتكامل</p>
+                            </div>
+                            
+                            <form id="loginForm">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label" data-lang="username">اسم المستخدم</label>
+                                    <input type="text" class="form-control" id="username" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="password" class="form-label" data-lang="password">كلمة المرور</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="password" required>
+                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="languageSelect" class="form-label" data-lang="language">اللغة</label>
+                                    <select class="form-select" id="languageSelect">
+                                        <option value="ar">العربية</option>
+                                        <option value="en">English</option>
+                                    </select>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-neon w-100 mb-3" data-lang="login">تسجيل الدخول</button>
+                            </form>
+                            
+                            <div class="text-center">
+                                <small class="text-muted">
+                                    <span data-lang="demoCredentials">بيانات تجريبية:</span><br>
+                                    Admin: Hesham / 1902<br>
+                                    Sub-User: store1 / 123
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="mainApp" class="d-none">
+        <!-- Header -->
+        <header id="appHeader" class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-link text-white me-3" id="sidebarToggle">
+                        <i class="bi bi-list fs-4"></i>
+                    </button>
+                    <img src="images/logo.png" alt="Logo" width="40" height="40" class="me-2">
+                    <span class="navbar-brand mb-0 h1">BRAINBYTE ERP</span>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                    <!-- Search -->
+                    <div class="me-3 position-relative">
+                        <input type="text" class="form-control search-input" id="globalSearch" data-lang-placeholder="بحث شامل...">
+                        <div id="searchResults" class="search-results"></div>
+                    </div>
+                    
+                    <!-- Notifications -->
+                    <div class="dropdown me-3">
+                        <button class="btn btn-link text-white position-relative" id="notificationsBell" data-bs-toggle="dropdown">
+                            <i class="bi bi-bell fs-5"></i>
+                            <span class="badge bg-danger notification-count">0</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end notification-dropdown">
+                            <li><h6 class="dropdown-header" data-lang="notifications">الإشعارات</h6></li>
+                            <li id="noNotifications"><span class="dropdown-item-text text-muted" data-lang="noNotifications">لا توجد إشعارات جديدة</span></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Theme Toggle -->
+                    <button class="btn btn-link text-white me-3" id="themeToggle">
+                        <i class="bi bi-moon fs-5"></i>
+                    </button>
+                    
+                    <!-- Language Toggle -->
+                    <button class="btn btn-link text-white me-3" id="langToggle">
+                        <i class="bi bi-translate fs-5"></i>
+                    </button>
+                    
+                    <!-- User Profile -->
+                    <div class="dropdown">
+                        <button class="btn btn-link text-white d-flex align-items-center" data-bs-toggle="dropdown">
+                            <img src="https://via.placeholder.com/32" alt="User" class="rounded-circle me-2" width="32" height="32">
+                            <span id="currentUserName">Admin</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#" onclick="showView('profile')"><i class="bi bi-person me-2"></i><span data-lang="profile">الملف الشخصي</span></a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-right me-2"></i><span data-lang="logout">تسجيل الخروج</span></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <nav id="appSidebar" class="sidebar">
+            <div class="sidebar-content">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" onclick="showView('dashboard')">
+                            <i class="bi bi-speedometer2"></i>
+                            <span data-lang="dashboard">لوحة التحكم</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showView('products')">
+                            <i class="bi bi-box"></i>
+                            <span data-lang="products">المنتجات</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showView('warehouses')">
+                            <i class="bi bi-building"></i>
+                            <span data-lang="warehouses">المخازن</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showView('sales')">
+                            <i class="bi bi-cart-check"></i>
+                            <span data-lang="sales">المبيعات</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showView('returns')">
+                            <i class="bi bi-arrow-return-left"></i>
+                            <span data-lang="returns">المرتجعات</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showView('requests')">
+                            <i class="bi bi-clipboard-check"></i>
+                            <span data-lang="requests">الطلبات</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showView('customers')">
+                            <i class="bi bi-people"></i>
+                            <span data-lang="customers">العملاء</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showView('suppliers')">
+                            <i class="bi bi-truck"></i>
+                            <span data-lang="suppliers">الموردون</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showView('hr')">
+                            <i class="bi bi-person-badge"></i>
+                            <span data-lang="hr">الموارد البشرية</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showView('expenses')">
+                            <i class="bi bi-receipt"></i>
+                            <span data-lang="expenses">المصروفات</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showView('reports')">
+                            <i class="bi bi-graph-up"></i>
+                            <span data-lang="reports">التقارير</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showView('settings')">
+                            <i class="bi bi-gear"></i>
+                            <span data-lang="settings">الإعدادات</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main id="appMain" class="main-content">
+            <!-- Dashboard View -->
+            <div id="view-dashboard" class="view-container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 data-lang="dashboard">لوحة التحكم</h1>
+                    <button class="btn btn-outline-neon" onclick="exportDashboard()">
+                        <i class="bi bi-download me-2"></i>
+                        <span data-lang="exportDashboard">تصدير اللوحة</span>
+                    </button>
+                </div>
+                
+                <!-- KPIs -->
+                <div class="row mb-4" id="kpiWidgets">
+                    <div class="col-lg-3 col-md-6 mb-3 widget-item" data-widget="sales">
+                        <div class="card card-neon h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-subtitle mb-2 text-muted" data-lang="todaySales">مبيعات اليوم</h6>
+                                        <h3 class="card-title neon-text" id="todaySalesAmount">0</h3>
+                                    </div>
+                                    <div class="icon-bg neon-cyan">
+                                        <i class="bi bi-currency-dollar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-3 widget-item" data-widget="invoices">
+                        <div class="card card-neon h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-subtitle mb-2 text-muted" data-lang="todayInvoices">فواتير اليوم</h6>
+                                        <h3 class="card-title neon-text" id="todayInvoicesCount">0</h3>
+                                    </div>
+                                    <div class="icon-bg neon-purple">
+                                        <i class="bi bi-receipt"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-3 widget-item" data-widget="inventory">
+                        <div class="card card-neon h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-subtitle mb-2 text-muted" data-lang="inventoryValue">قيمة المخزون</h6>
+                                        <h3 class="card-title neon-text" id="inventoryValue">0</h3>
+                                    </div>
+                                    <div class="icon-bg neon-green">
+                                        <i class="bi bi-box"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-3 widget-item" data-widget="lowStock">
+                        <div class="card card-neon h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-subtitle mb-2 text-muted" data-lang="lowStock">مخزون منخفض</h6>
+                                        <h3 class="card-title neon-text text-warning" id="lowStockCount">0</h3>
+                                    </div>
+                                    <div class="icon-bg neon-orange">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts -->
+                <div class="row">
+                    <div class="col-lg-8 mb-4 widget-item" data-widget="salesChart">
+                        <div class="card card-neon h-100">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0" data-lang="salesTrend">اتجاه المبيعات</h5>
+                                <div class="chart-filters">
+                                    <select class="form-select form-select-sm" id="salesChartFilter">
+                                        <option value="7" data-lang="last7Days">آخر 7 أيام</option>
+                                        <option value="30" data-lang="last30Days">آخر 30 يوم</option>
+                                        <option value="90" data-lang="last90Days">آخر 90 يوم</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="salesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 mb-4 widget-item" data-widget="topProducts">
+                        <div class="card card-neon h-100">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0" data-lang="topProducts">أكثر المنتجات مبيعاً</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="topProductsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="row">
+                    <div class="col-12 widget-item" data-widget="recentActivity">
+                        <div class="card card-neon">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0" data-lang="recentActivity">النشاط الأخير</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="recentActivityList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products View -->
+            <div id="view-products" class="view-container d-none">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 data-lang="products">المنتجات</h1>
+                    <button class="btn btn-neon" onclick="showProductForm()">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        <span data-lang="addProduct">إضافة منتج</span>
+                    </button>
+                </div>
+                
+                <!-- Filters -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" id="productSearch" data-lang-placeholder="بحث في المنتجات...">
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="categoryFilter">
+                                    <option value="" data-lang="allCategories">جميع الفئات</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="stockFilter">
+                                    <option value="" data-lang="allStock">جميع المنتجات</option>
+                                    <option value="low" data-lang="lowStockOnly">مخزون منخفض فقط</option>
+                                    <option value="out" data-lang="outOfStock">نفد المخزون</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-neon w-100" onclick="clearProductFilters()">
+                                    <span data-lang="clearFilters">إعادة تعيين</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Products Table -->
+                <div class="card card-neon">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th data-lang="image">الصورة</th>
+                                        <th data-lang="name">الاسم</th>
+                                        <th data-lang="code">الكود</th>
+                                        <th data-lang="barcode">الباركود</th>
+                                        <th data-lang="category">الفئة</th>
+                                        <th data-lang="stock">المخزون</th>
+                                        <th data-lang="price">السعر</th>
+                                        <th data-lang="actions">الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales View -->
+            <div id="view-sales" class="view-container d-none">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 data-lang="sales">المبيعات</h1>
+                    <button class="btn btn-neon" onclick="createNewInvoice()">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        <span data-lang="newInvoice">فاتورة جديدة</span>
+                    </button>
+                </div>
+                
+                <!-- Invoice Form -->
+                <div id="invoiceForm" class="card card-neon mb-4 d-none">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0" data-lang="createInvoice">إنشاء فاتورة</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label" data-lang="customer">العميل</label>
+                                <select class="form-select" id="invoiceCustomer">
+                                    <option value="" data-lang="selectCustomer">اختر العميل</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" data-lang="date">التاريخ</label>
+                                <input type="date" class="form-control" id="invoiceDate">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" data-lang="warehouse">المخزن</label>
+                                <select class="form-select" id="invoiceWarehouse">
+                                    <option value="" data-lang="selectWarehouse">اختر المخزن</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Add Products -->
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-label" data-lang="product">المنتج</label>
+                                        <input type="text" class="form-control" id="productSearch" data-lang-placeholder="بحث أو مسح الباركود...">
+                                        <div id="productSuggestions" class="suggestions-dropdown"></div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label" data-lang="quantity">الكمية</label>
+                                        <input type="number" class="form-control" id="productQuantity" value="1" min="1">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label" data-lang="price">السعر</label>
+                                        <input type="number" class="form-control" id="productPrice" step="0.01">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">&nbsp;</label>
+                                        <button class="btn btn-neon w-100" onclick="addProductToInvoice()">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Invoice Items -->
+                        <div class="table-responsive mt-3">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th data-lang="product">المنتج</th>
+                                        <th data-lang="quantity">الكمية</th>
+                                        <th data-lang="price">السعر</th>
+                                        <th data-lang="discount">الخصم</th>
+                                        <th data-lang="total">المجموع</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoiceItemsTableBody"></tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Invoice Summary -->
+                        <div class="invoice-summary">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label class="form-label" data-lang="notes">ملاحظات</label>
+                                        <textarea class="form-control" id="invoiceNotes" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="summary-card">
+                                        <div class="d-flex justify-content-between">
+                                            <span data-lang="subtotal">المجموع الفرعي:</span>
+                                            <span id="invoiceSubtotal">0.00</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span data-lang="discount">الخصم:</span>
+                                            <span id="invoiceDiscount">0.00</span>
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between fw-bold neon-text">
+                                            <span data-lang="total">الإجمالي:</span>
+                                            <span id="invoiceTotal">0.00</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-3">
+                                        <button class="btn btn-neon w-100 mb-2" onclick="saveInvoice()">
+                                            <i class="bi bi-save me-2"></i>
+                                            <span data-lang="saveInvoice">حفظ الفاتورة</span>
+                                        </button>
+                                        <button class="btn btn-outline-neon w-100" onclick="printInvoice()">
+                                            <i class="bi bi-printer me-2"></i>
+                                            <span data-lang="printInvoice">طباعة</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sales History -->
+                <div class="card card-neon">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0" data-lang="salesHistory">سجل المبيعات</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th data-lang="invoiceNumber">رقم الفاتورة</th>
+                                        <th data-lang="date">التاريخ</th>
+                                        <th data-lang="customer">العميل</th>
+                                        <th data-lang="total">الإجمالي</th>
+                                        <th data-lang="status">الحالة</th>
+                                        <th data-lang="actions">الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="salesHistoryTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warehouses View -->
+            <div id="view-warehouses" class="view-container d-none">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 data-lang="warehouses">المخازن</h1>
+                    <div>
+                        <button class="btn btn-outline-neon me-2" onclick="showWarehouseTransferForm()">
+                            <i class="bi bi-arrow-left-right me-2"></i>
+                            <span data-lang="transfer">تحويل</span>
+                        </button>
+                        <button class="btn btn-neon" onclick="showWarehouseForm()">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            <span data-lang="addWarehouse">إضافة مخزن</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Warehouses List -->
+                <div class="row" id="warehousesList"></div>
+                
+                <!-- Transfer Requests -->
+                <div class="card card-neon mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0" data-lang="transferRequests">طلبات التحويل</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th data-lang="requestId">رقم الطلب</th>
+                                        <th data-lang="from">من</th>
+                                        <th data-lang="to">إلى</th>
+                                        <th data-lang="items">الأصناف</th>
+                                        <th data-lang="status">الحالة</th>
+                                        <th data-lang="date">التاريخ</th>
+                                        <th data-lang="actions">الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transferRequestsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HR View -->
+            <div id="view-hr" class="view-container d-none">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 data-lang="hr">الموارد البشرية</h1>
+                    <button class="btn btn-neon" onclick="showEmployeeForm()">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        <span data-lang="addEmployee">إضافة موظف</span>
+                    </button>
+                </div>
+                
+                <!-- HR Tabs -->
+                <ul class="nav nav-tabs mb-4" id="hrTabs">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#employees-tab" data-lang="employees">الموظفون</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#attendance-tab" data-lang="attendance">الحضور والغياب</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#payroll-tab" data-lang="payroll">الرواتب</button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content">
+                    <!-- Employees Tab -->
+                    <div class="tab-pane fade show active" id="employees-tab">
+                        <div class="card card-neon">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th data-lang="name">الاسم</th>
+                                                <th data-lang="position">المنصب</th>
+                                                <th data-lang="department">القسم</th>
+                                                <th data-lang="salary">الراتب الأساسي</th>
+                                                <th data-lang="hireDate">تاريخ التوظيف</th>
+                                                <th data-lang="actions">الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="employeesTableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Attendance Tab -->
+                    <div class="tab-pane fade" id="attendance-tab">
+                        <div class="card card-neon">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h5 class="card-title mb-0" data-lang="attendanceRecord">سجل الحضور</h5>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="month" class="form-control" id="attendanceMonth">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th data-lang="employee">الموظف</th>
+                                                <th data-lang="workingDays">أيام العمل</th>
+                                                <th data-lang="presentDays">أيام الحضور</th>
+                                                <th data-lang="absentDays">أيام الغياب</th>
+                                                <th data-lang="actions">الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="attendanceTableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payroll Tab -->
+                    <div class="tab-pane fade" id="payroll-tab">
+                        <div class="card card-neon">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h5 class="card-title mb-0" data-lang="payrollSheet">كشف الرواتب</h5>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex">
+                                            <input type="month" class="form-control me-2" id="payrollMonth">
+                                            <button class="btn btn-neon" onclick="generatePayroll()">
+                                                <span data-lang="generate">إنشاء</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th data-lang="employee">الموظف</th>
+                                                <th data-lang="baseSalary">الراتب الأساسي</th>
+                                                <th data-lang="allowances">البدلات</th>
+                                                <th data-lang="deductions">الخصومات</th>
+                                                <th data-lang="netSalary">صافي الراتب</th>
+                                                <th data-lang="actions">الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="payrollTableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports View -->
+            <div id="view-reports" class="view-container d-none">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 data-lang="reports">التقارير</h1>
+                    <button class="btn btn-neon" onclick="exportReport()">
+                        <i class="bi bi-download me-2"></i>
+                        <span data-lang="exportReport">تصدير التقرير</span>
+                    </button>
+                </div>
+                
+                <!-- Report Filters -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label" data-lang="reportType">نوع التقرير</label>
+                                <select class="form-select" id="reportType">
+                                    <option value="sales" data-lang="salesReport">تقرير المبيعات</option>
+                                    <option value="inventory" data-lang="inventoryReport">تقرير المخزون</option>
+                                    <option value="financial" data-lang="financialReport">التقرير المالي</option>
+                                    <option value="employee" data-lang="employeeReport">تقرير الموظفين</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" data-lang="fromDate">من تاريخ</label>
+                                <input type="date" class="form-control" id="reportFromDate">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" data-lang="toDate">إلى تاريخ</label>
+                                <input type="date" class="form-control" id="reportToDate">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button class="btn btn-neon w-100" onclick="generateReport()">
+                                    <i class="bi bi-graph-up me-2"></i>
+                                    <span data-lang="generateReport">إنشاء التقرير</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Report Content -->
+                <div id="reportContent" class="card card-neon">
+                    <div class="card-body">
+                        <div class="text-center text-muted py-5">
+                            <i class="bi bi-graph-up display-1"></i>
+                            <p class="mt-3" data-lang="selectReportToGenerate">اختر نوع التقرير وانقر إنشاء</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div id="view-settings" class="view-container d-none">
+                <h1 class="mb-4" data-lang="settings">الإعدادات</h1>
+                
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card card-neon mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0" data-lang="companySettings">إعدادات الشركة</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label" data-lang="companyName">اسم الشركة</label>
+                                            <input type="text" class="form-control" id="companyName">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label" data-lang="phone">الهاتف</label>
+                                            <input type="text" class="form-control" id="companyPhone">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label" data-lang="email">البريد الإلكتروني</label>
+                                            <input type="email" class="form-control" id="companyEmail">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label" data-lang="address">العنوان</label>
+                                            <textarea class="form-control" id="companyAddress" rows="3"></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label" data-lang="currency">العملة</label>
+                                            <select class="form-select" id="currency">
+                                                <option value="SAR">ريال سعودي (SAR)</option>
+                                                <option value="USD">دولار أمريكي (USD)</option>
+                                                <option value="EUR">يورو (EUR)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button class="btn btn-neon" onclick="saveCompanySettings()">
+                                    <i class="bi bi-save me-2"></i>
+                                    <span data-lang="saveSettings">حفظ الإعدادات</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Invoice Settings -->
+                        <div class="card card-neon">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0" data-lang="invoiceSettings">إعدادات الفواتير</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label" data-lang="invoiceTemplate">قالب الفاتورة</label>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="template-option" data-template="classic">
+                                                <div class="template-preview">كلاسيكي</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="template-option" data-template="modern">
+                                                <div class="template-preview">عصري</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="template-option" data-template="minimal">
+                                                <div class="template-preview">بسيط</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label" data-lang="invoiceFooter">تذييل الفاتورة</label>
+                                    <textarea class="form-control" id="invoiceFooter" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <!-- System Settings -->
+                        <div class="card card-neon mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0" data-lang="systemSettings">إعدادات النظام</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label" data-lang="defaultLanguage">اللغة الافتراضية</label>
+                                    <select class="form-select" id="defaultLanguage">
+                                        <option value="ar">العربية</option>
+                                        <option value="en">English</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label" data-lang="dateFormat">تنسيق التاريخ</label>
+                                    <select class="form-select" id="dateFormat">
+                                        <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                                        <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="enableBarcode">
+                                    <label class="form-check-label" for="enableBarcode" data-lang="enableBarcode">
+                                        تمكين الباركود
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="enableNotifications">
+                                    <label class="form-check-label" for="enableNotifications" data-lang="enableNotifications">
+                                        تمكين الإشعارات
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Backup & Data -->
+                        <div class="card card-neon">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0" data-lang="dataManagement">إدارة البيانات</h5>
+                            </div>
+                            <div class="card-body">
+                                <button class="btn btn-outline-neon w-100 mb-2" onclick="exportData()">
+                                    <i class="bi bi-download me-2"></i>
+                                    <span data-lang="exportData">تصدير البيانات</span>
+                                </button>
+                                
+                                <button class="btn btn-outline-warning w-100 mb-2" onclick="importData()">
+                                    <i class="bi bi-upload me-2"></i>
+                                    <span data-lang="importData">استيراد البيانات</span>
+                                </button>
+                                
+                                <button class="btn btn-outline-danger w-100" onclick="resetData()">
+                                    <i class="bi bi-trash me-2"></i>
+                                    <span data-lang="resetData">إعادة تعيين البيانات</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile View -->
+            <div id="view-profile" class="view-container d-none">
+                <h1 class="mb-4" data-lang="profile">الملف الشخصي</h1>
+                
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="card card-neon text-center">
+                            <div class="card-body">
+                                <img src="https://via.placeholder.com/120" alt="User Avatar" class="rounded-circle mb-3" width="120" height="120">
+                                <h5 id="profileUserName">Hesham</h5>
+                                <p class="text-muted" id="profileUserRole">Administrator</p>
+                                <button class="btn btn-outline-neon btn-sm" onclick="changeAvatar()">
+                                    <i class="bi bi-camera me-1"></i>
+                                    <span data-lang="changePhoto">تغيير الصورة</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-8">
+                        <div class="card card-neon">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0" data-lang="accountInfo">معلومات الحساب</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label" data-lang="username">اسم المستخدم</label>
+                                            <input type="text" class="form-control" id="profileUsername" readonly>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label" data-lang="role">الدور</label>
+                                            <input type="text" class="form-control" id="profileRole" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label" data-lang="lastLogin">آخر دخول</label>
+                                            <input type="text" class="form-control" id="profileLastLogin" readonly>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label" data-lang="preferredLanguage">اللغة المفضلة</label>
+                                            <select class="form-select" id="profileLanguage">
+                                                <option value="ar">العربية</option>
+                                                <option value="en">English</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button class="btn btn-neon" onclick="updateProfile()">
+                                    <i class="bi bi-save me-2"></i>
+                                    <span data-lang="updateProfile">تحديث الملف</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Recent Activity -->
+                        <div class="card card-neon mt-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0" data-lang="recentActivity">النشاط الأخير</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="profileActivityList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other Views (simplified) -->
+            <div id="view-returns" class="view-container d-none">
+                <h1 class="mb-4" data-lang="returns">المرتجعات</h1>
+                <div class="card card-neon">
+                    <div class="card-body">
+                        <p data-lang="returnsDescription">إدارة مرتجعات المبيعات والمشتريات</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-requests" class="view-container d-none">
+                <h1 class="mb-4" data-lang="requests">الطلبات</h1>
+                <div class="card card-neon">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th data-lang="requestId">رقم الطلب</th>
+                                        <th data-lang="type">النوع</th>
+                                        <th data-lang="from">من</th>
+                                        <th data-lang="status">الحالة</th>
+                                        <th data-lang="date">التاريخ</th>
+                                        <th data-lang="actions">الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="requestsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-customers" class="view-container d-none">
+                <h1 class="mb-4" data-lang="customers">العملاء</h1>
+                <div class="card card-neon">
+                    <div class="card-body">
+                        <p data-lang="customersDescription">إدارة بيانات العملاء وسجل المعاملات</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-suppliers" class="view-container d-none">
+                <h1 class="mb-4" data-lang="suppliers">الموردون</h1>
+                <div class="card card-neon">
+                    <div class="card-body">
+                        <p data-lang="suppliersDescription">إدارة بيانات الموردين وسجل المشتريات</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-expenses" class="view-container d-none">
+                <h1 class="mb-4" data-lang="expenses">المصروفات</h1>
+                <div class="card card-neon">
+                    <div class="card-body">
+                        <p data-lang="expensesDescription">تسجيل ومتابعة مصروفات الشركة</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Quick Actions FAB -->
+        <div id="quickActionsFab" class="fab-container">
+            <button class="fab-main btn-neon" id="fabMain">
+                <i class="bi bi-plus"></i>
+            </button>
+            <div class="fab-menu">
+                <button class="fab-item" onclick="createNewInvoice()" title="فاتورة جديدة">
+                    <i class="bi bi-receipt"></i>
+                </button>
+                <button class="fab-item" onclick="showProductForm()" title="إضافة منتج">
+                    <i class="bi bi-box"></i>
+                </button>
+                <button class="fab-item" onclick="showWarehouseTransferForm()" title="تحويل مخزني">
+                    <i class="bi bi-arrow-left-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Universal Modal -->
+    <div class="modal fade" id="universalModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Modal Title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+                <div class="modal-footer" id="modalFooter">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-lang="cancel">إلغاء</button>
+                    <button type="button" class="btn btn-neon" id="modalSaveBtn" data-lang="save">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" data-lang="confirmation">تأكيد</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="confirmModalBody">
+                    <!-- Dynamic content -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-lang="cancel">إلغاء</button>
+                    <button type="button" class="btn btn-danger" id="confirmBtn" data-lang="confirm">تأكيد</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer"></div>
+
+    <!-- Keyboard Shortcuts Help -->
+    <div class="modal fade" id="shortcutsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" data-lang="keyboardShortcuts">اختصارات لوحة المفاتيح</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <strong>Ctrl + I</strong><br>
+                            <span data-lang="newInvoice">فاتورة جديدة</span>
+                        </div>
+                        <div class="col-6">
+                            <strong>Ctrl + K</strong><br>
+                            <span data-lang="globalSearch">البحث الشامل</span>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <strong>Ctrl + S</strong><br>
+                            <span data-lang="save">حفظ</span>
+                        </div>
+                        <div class="col-6">
+                            <strong>Ctrl + /</strong><br>
+                            <span data-lang="showShortcuts">عرض الاختصارات</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for imports -->
+    <input type="file" id="hiddenFileInput" accept=".json" style="display: none;">
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Main App Script -->
+    <script src="app.js"></script>
+</body>
+</html>
